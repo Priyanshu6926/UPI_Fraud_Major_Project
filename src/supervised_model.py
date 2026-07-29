@@ -43,7 +43,7 @@ def train_supervised_models(
     report_dir: Path | str = REPORTS_DIR,
     test_size: float = 0.2,
     random_state: int = 42,
-    max_rows: int = 500_000,
+    max_rows: int = 10_000_000,
 ) -> dict[str, Any]:
     """Train XGBoost and Random Forest models on engineered transaction features."""
     training_df = sample_training_data(df, max_rows=max_rows, random_state=random_state)

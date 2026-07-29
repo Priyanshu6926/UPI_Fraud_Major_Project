@@ -27,7 +27,7 @@ def train_anomaly_models(
     report_dir: Path | str = REPORTS_DIR,
     contamination: float = 0.05,
     random_state: int = 42,
-    max_rows: int = 200_000,
+    max_rows: int = 10_000_000,
 ) -> dict[str, pd.DataFrame]:
     """Train Isolation Forest and LOF models and save anomaly outputs."""
     training_df = sample_anomaly_data(df, max_rows=max_rows, random_state=random_state)

@@ -75,12 +75,7 @@ def main() -> int:
     if run_all or args.features:
         print("Stage 3/5: Engineering features...")
         mapped = mapped if mapped is not None else load_and_map_all()
-        feature_df = balanced_binary_sample(
-            mapped,
-            target_column="fraud_label",
-            max_rows=300_000,
-            random_state=42,
-        )
+        feature_df = mapped
         print(f"Using balanced feature-engineering sample: {feature_df.shape}")
         engineered = engineer_features(feature_df)
         save_dataframe(engineered, PROCESSED_DATA_DIR / "engineered_features.csv")

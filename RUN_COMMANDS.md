@@ -278,3 +278,6 @@ http://localhost:5174
 8. Show supervised output and anomaly output separately.
 
 Remember: this project stops at supervised fraud detection and unsupervised anomaly detection. It does not implement a final grey-area fusion engine yet.
+
+
+source .venv/bin/activate
