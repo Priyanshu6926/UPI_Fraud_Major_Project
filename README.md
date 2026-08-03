@@ -1,119 +1,220 @@
-# Hybrid Anomaly Detection for Identifying Ambiguous UPI Transactions
+# UPI Fraud Detection — Hybrid Anomaly Detection System
 
-Offline, batch-processing research project for post-transaction fraud analysis.
+[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)](https://streamlit.io/)
+[![Scikit-Learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-111111?style=for-the-badge)](https://xgboost.readthedocs.io/)
 
-The current implementation covers:
+An end-to-end, batch-processing research pipeline designed to detect anomalous and fraudulent Unified Payments Interface (UPI) transactions using a hybrid modeling approach (Supervised Classification + Unsupervised Anomaly Detection).
 
-- Dataset loading and schema mapping
-- Data preprocessing
-- Feature engineering
-- Supervised fraud detection with XGBoost and Random Forest
-- Unsupervised anomaly detection with Isolation Forest and Local Outlier Factor
-- Streamlit testing dashboard for manually checking model behavior
+---
 
-The project intentionally does not implement real-time streaming, APIs, banking integration,
-authentication, production deployment, hybrid risk fusion, or a final grey-area decision engine.
+## 📌 Project Overview
 
-## Datasets
+Digital payment systems like UPI process millions of transactions daily, making rapid and accurate fraud identification critical. This project implements a batch machine learning framework that:
+1. Ingests diverse transaction datasets from multiple sources.
+2. Standardizes disparate raw records into a unified **Common Schema**.
+3. Performs domain-specific feature engineering (transaction velocity, frequency, account delta).
+4. Trains **Supervised Classification Models** (XGBoost & Random Forest) to classify known fraud vectors.
+5. Trains **Unsupervised Anomaly Detection Models** (Isolation Forest & Local Outlier Factor) to flag zero-day suspicious behavior patterns.
+6. Offers dual local testing dashboards:
+   - **Streamlit App**: Lightweight Python testing UI.
+   - **Vite React + FastAPI**: Modern full-stack interactive dashboard.
 
-Use only the following datasets and place downloaded files under `data/raw/`:
+---
 
-1. PaySim Dataset from Kaggle
-2. UPI Transaction 2024 from Kaggle
-3. IEEE Fraud Detection from Kaggle
-4. Digital Payment Transactions from Zenodo
-
-No synthetic datasets are required or generated.
-
-## Folder Structure
+## ⚙️ System Architecture
 
 ```text
-upi-fraud-detection/
-|-- data/
-|   |-- raw/
-|   |-- processed/
-|   `-- merged/
-|-- notebooks/
-|-- src/
-|-- models/
-|-- app/
-|   `-- components/
-|-- reports/
-|-- requirements.txt
-|-- README.md
-`-- main.py
+               +----------------------------------+
+               |           Raw Datasets           |
+               | (PaySim, UPI 2024, IEEE, Zenodo) |
+               +----------------------------------+
+                                |
+                                v
+               +----------------------------------+
+               |      Schema Mapping Module       |
+               |     (Standardized Schema)        |
+               +----------------------------------+
+                                |
+                                v
+               +----------------------------------+
+               | Feature Engineering & Preprocessing|
+               +----------------------------------+
+                                |
+                +---------------+---------------+
+                |                               |
+                v                               v
+   +-------------------------+     +-------------------------+
+   |    Supervised Models    |     |   Unsupervised Models   |
+   | (XGBoost / Random Forest)|     |  (Isolation Forest/LOF) |
+   +-------------------------+     +-------------------------+
+                |                               |
+                +---------------+---------------+
+                                |
+                                v
+               +----------------------------------+
+               |    Model Evaluation & Reports    |
+               +----------------------------------+
+                                |
+       +------------------------+------------------------+
+       |                                                 |
+       v                                                 v
++-----------------------------+               +-----------------------------+
+|    Streamlit Dashboard UI   |               |   FastAPI + React Frontend  |
++-----------------------------+               +-----------------------------+
 ```
 
-## Setup
+---
+
+## 📁 Repository Structure
+
+```text
+UPI-Fraud-Detection/
+├── api/                      # FastAPI service for React frontend model inference
+│   ├── __init__.py
+│   └── main.py
+├── app/                      # Streamlit testing dashboard & prediction engine
+│   ├── components/
+│   ├── app.py
+│   ├── dashboard.py
+│   └── prediction_engine.py
+├── data/                     # Dataset storage (Git-ignored CSVs/Parquet)
+│   ├── raw/                  # Place original downloaded datasets here
+│   ├── processed/            # Preprocessed datasets & feature matrices
+│   └── merged/               # Unified schema output dataset
+├── frontend/                 # Vite + React frontend dashboard
+│   ├── src/
+│   │   ├── main.jsx
+│   │   └── styles.css
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+├── models/                   # Saved model artifacts (.pkl files)
+├── notebooks/                # Exploratory Jupyter Notebooks
+│   ├── eda.ipynb
+│   ├── preprocessing.ipynb
+│   ├── feature_engineering.ipynb
+│   ├── supervised_model.ipynb
+│   └── anomaly_detection.ipynb
+├── reports/                  # Generated evaluation plots & JSON metrics
+├── src/                      # Core python pipeline modules
+│   ├── data_loader.py
+│   ├── data_preprocessing.py
+│   ├── feature_engineering.py
+│   ├── sampling.py
+│   ├── schema_mapping.py
+│   ├── supervised_model.py
+│   ├── anomaly_detection.py
+│   └── utils.py
+├── .gitignore
+├── main.py                   # Main pipeline entry point
+├── README.md
+├── RUN_COMMANDS.md           # Execution reference guide
+└── requirements.txt          # Python dependencies
+```
+
+---
+
+## 📊 Standardized Common Schema
+
+All incoming raw datasets are transformed into the following common schema:
+
+| Feature Name | Description |
+| :--- | :--- |
+| `transaction_id` | Unique transaction identifier |
+| `timestamp` | Date & time of the transaction |
+| `amount` | Transaction monetary value |
+| `sender_id` | Account ID initiating the payment |
+| `receiver_id` | Beneficiary Account ID |
+| `device_type` | Device category used (Mobile, Web, POS) |
+| `merchant_category` | Category of recipient merchant |
+| `location` | Geographic origin of transaction |
+| `transaction_type` | Type (TRANSFER, PAYMENT, CASH_OUT, etc.) |
+| `fraud_label` | Target binary label (1 = Fraud, 0 = Legitimate) |
+
+---
+
+## 📂 Datasets Required
+
+To run the complete batch pipeline, download the following public datasets and place the `.csv` files into the `data/raw/` folder:
+
+1. **PaySim Dataset** (Kaggle)
+2. **UPI Transaction 2024** (Kaggle)
+3. **IEEE Fraud Detection** (Kaggle)
+4. **Digital Payment Transactions** (Zenodo)
+
+---
+
+## 🚀 Quickstart Guide
+
+### 1. Environment Setup
+
+Clone the repository and create a Python virtual environment:
 
 ```bash
+git clone https://github.com/Priyanshu6926/UPI_Fraud_Major_Project.git
+cd UPI_Fraud_Major_Project
+
+# Create and activate virtual environment
 python -m venv .venv
+
+# On Linux/macOS:
+source .venv/bin/activate
+
+# On Windows:
 .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## Batch Pipeline
+---
+
+### 2. Run the Data & Model Pipeline
+
+Executes schema mapping, feature engineering, model training, and generates report metrics:
 
 ```bash
 python main.py --all
 ```
 
-The pipeline discovers supported dataset files in `data/raw/`, maps them into the
-common schema, preprocesses them, engineers features, trains supervised models, and
-trains anomaly detection models.
+---
 
-## Streamlit Testing Dashboard
+### 3. Launching the Testing Dashboards
+
+#### Option A: Streamlit Dashboard (Python UI)
 
 ```bash
 streamlit run app/app.py
 ```
 
-The dashboard is a local testing interface only. It lets you enter or select a sample
-transaction, then displays supervised and unsupervised model outputs separately.
+#### Option B: Vite React Dashboard + FastAPI Backend
 
-## Vite React Testing Dashboard
-
-The React dashboard uses a small local FastAPI service because browser JavaScript cannot
-load Python `joblib`, scikit-learn, XGBoost, or Isolation Forest model artifacts directly.
-
-Start the API:
-
+**Terminal 1 — Backend API:**
 ```bash
 uvicorn api.main:app --reload
 ```
 
-Start the React app in a second terminal:
-
+**Terminal 2 — Frontend UI:**
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+Open your browser at `http://localhost:5173`.
 
-Open:
+---
 
-```text
-http://localhost:5173
-```
+## 🛡️ Scope & Boundaries
 
-The API is local-only and is used only for manual offline model testing.
+- **Focus**: Research, dataset mapping, feature extraction, supervised ML evaluation, and unsupervised anomaly detection.
+- **Out of Scope**: Production payment gateway integration, real-time banking stream ingestion, live authentication, or automated transaction blocking.
 
-## Common Schema
+---
 
-Every dataset is mapped into:
+## 📜 License
 
-- `transaction_id`
-- `timestamp`
-- `amount`
-- `sender_id`
-- `receiver_id`
-- `device_type`
-- `merchant_category`
-- `location`
-- `transaction_type`
-- `fraud_label`
-
-## Important Boundary
-
-This project stops at supervised fraud detection and unsupervised anomaly detection.
-It does not combine both outputs into a final grey-area or risk-fusion decision.
+Distributed under the MIT License. See `LICENSE` for more information.

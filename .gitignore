@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -11,37 +12,57 @@ __pycache__/
 venv/
 env/
 ENV/
+env.bak/
+venv.bak/
 
-# Jupyter
+# Jupyter Notebooks
 .ipynb_checkpoints/
 
 # Environment files
 .env
 .env.*
+!.env.example
 
-# Local model and generated artifacts
+# Datasets (Keep directory structure via .gitkeep, ignore data files)
+data/raw/*.csv
+data/processed/*.csv
+data/merged/*.csv
+data/processed/*.parquet
+*.csv
+*.parquet
+
+# ML Models & Binary Artifacts
 models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.onnx
+models/*.pth
+models/*.pt
+
+# Evaluation Reports & Generated Artifacts
 reports/*.png
 reports/*.json
-data/merged/*.csv
-data/processed/*.csv
-data/raw/*.csv
-data/processed/*.parquet
+reports/*.html
+reports/*.pdf
 
-# Frontend
+# Frontend & Node
 frontend/node_modules/
 frontend/dist/
-
-# Build / cache
-build/
+frontend/.cache/
+node_modules/
 dist/
+
+# Build & Logs
+build/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# IDE / OS
+# IDE & OS Artifacts
 .vscode/
 .idea/
+*.swp
+*.swo
 .DS_Store
 Thumbs.db
