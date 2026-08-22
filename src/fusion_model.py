@@ -36,12 +36,15 @@ def fuse_signals(
         anomaly.get("anomaly_percentile", anomaly.get("anomaly_confidence", 0.0))
     )
 
-    disagreement = abs(fraud_probability - unusualness_percentile)
+    # Convert raw anomaly percentile into an anomaly risk score relative to normal baseline (0.70)
+    anomaly_risk = _unit_interval((unusualness_percentile - 0.70) / 0.25) if unusualness_percentile > 0.70 else 0.0
+
+    disagreement = abs(fraud_probability - anomaly_risk)
     supervised_uncertainty = 1.0 - abs((2.0 * fraud_probability) - 1.0)
     repeatability_penalty = _repeatability_penalty(diagnostics)
     fusion_score = (
         FUSION_WEIGHTS["supervised_fraud_probability"] * fraud_probability
-        + FUSION_WEIGHTS["unsupervised_unusualness_percentile"] * unusualness_percentile
+        + FUSION_WEIGHTS["unsupervised_unusualness_percentile"] * anomaly_risk
     )
     ambiguity_score = (
         0.50 * disagreement
