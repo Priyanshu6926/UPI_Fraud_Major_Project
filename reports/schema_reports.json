@@ -1,0 +1,24 @@
+{
+  "mapped_parquet": {
+    "path": "data/merged/mapped_common_schema.parquet",
+    "row_count": 7218220,
+    "chunk_count": 74,
+    "columns": [
+      "transaction_id",
+      "timestamp",
+      "amount",
+      "sender_id",
+      "receiver_id",
+      "device_type",
+      "merchant_category",
+      "location",
+      "transaction_type",
+      "fraud_label"
+    ],
+    "compression": "snappy",
+    "chunk_size": 100000,
+    "rows_read": 7218220,
+    "rows_removed": 0,
+    "rows_written": 7218220
+  }
+}

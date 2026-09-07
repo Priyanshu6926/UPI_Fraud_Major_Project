@@ -8,9 +8,12 @@
 [![XGBoost](https://img.shields.io/badge/XGBoost-2.1-189AB4?style=for-the-badge)](https://xgboost.readthedocs.io)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://vitejs.dev)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](Dockerfile)
 [![License](https://img.shields.io/badge/License-Academic%20Research-blueviolet?style=for-the-badge)](LICENSE)
 
 > **B.Tech Final Year Major Project** — An end-to-end offline machine learning research system that combines supervised fraud detection and unsupervised anomaly detection with a transparent explainable fusion layer, applied to 7.2 million real UPI transaction records.
+> 
+> 🚀 **Cloud Deployment**: Ready for 1-click free hosting on Render & Hugging Face Spaces. See [DEPLOYMENT.md](DEPLOYMENT.md).
 
 </div>
 

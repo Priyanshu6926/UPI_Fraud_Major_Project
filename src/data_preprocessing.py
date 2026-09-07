@@ -152,11 +152,21 @@ class UPITransactionPreprocessor:
         numeric_values = self.numeric_imputer.fit_transform(features[self.numeric_features_])
         return self.scaler.fit_transform(numeric_values)
 
+    @staticmethod
+    def _ensure_imputer_compat(imputer: Any) -> None:
+        """Ensure SimpleImputer compatibility across scikit-learn versions."""
+        if imputer is not None and not hasattr(imputer, "_fill_dtype"):
+            fit_dtype = getattr(imputer, "_fit_dtype", None)
+            if fit_dtype is None and hasattr(imputer, "statistics_") and hasattr(imputer.statistics_, "dtype"):
+                fit_dtype = imputer.statistics_.dtype
+            setattr(imputer, "_fill_dtype", fit_dtype if fit_dtype is not None else object)
+
     def _transform_numeric_block(self, features: pd.DataFrame) -> np.ndarray:
         if not self.numeric_features_:
             return np.empty((len(features), 0), dtype=np.float32)
         if self.numeric_imputer is None or self.scaler is None:
             raise RuntimeError("Preprocessor must be fitted before transform.")
+        self._ensure_imputer_compat(self.numeric_imputer)
         numeric_values = self.numeric_imputer.transform(features[self.numeric_features_])
         return self.scaler.transform(numeric_values)
 
@@ -173,6 +183,7 @@ class UPITransactionPreprocessor:
             return np.empty((len(features), 0), dtype=np.float32)
         if self.onehot_imputer is None or self.onehot_encoder is None:
             raise RuntimeError("Preprocessor must be fitted before transform.")
+        self._ensure_imputer_compat(self.onehot_imputer)
         onehot_values = self.onehot_imputer.transform(features[self.low_cardinality_features_])
         return self.onehot_encoder.transform(onehot_values)
 

@@ -82,9 +82,65 @@ def save_joblib(obj: object, path: Path | str) -> None:
     joblib.dump(obj, output_path)
 
 
+def _patch_sklearn_compat(obj: object) -> object:
+    """Ensure backward-compatibility for estimators across scikit-learn versions."""
+    if obj is None:
+        return obj
+
+    visited: set[int] = set()
+
+    def _patch(item: object) -> None:
+        if item is None:
+            return
+        item_id = id(item)
+        if item_id in visited:
+            return
+        visited.add(item_id)
+
+        # Patch SimpleImputer missing _fill_dtype (scikit-learn 1.6+ compatibility)
+        cls_name = getattr(getattr(item, "__class__", None), "__name__", "")
+        if "SimpleImputer" in cls_name:
+            if not hasattr(item, "_fill_dtype"):
+                fit_dtype = getattr(item, "_fit_dtype", None)
+                if fit_dtype is None and hasattr(item, "statistics_") and hasattr(item.statistics_, "dtype"):
+                    fit_dtype = item.statistics_.dtype
+                setattr(item, "_fill_dtype", fit_dtype if fit_dtype is not None else object)
+
+        # Traverse ColumnTransformer / Pipeline
+        if hasattr(item, "transformers_"):
+            for entry in getattr(item, "transformers_", []):
+                if isinstance(entry, (list, tuple)) and len(entry) >= 2:
+                    _patch(entry[1])
+        if hasattr(item, "named_steps") and isinstance(item.named_steps, dict):
+            for step in item.named_steps.values():
+                _patch(step)
+        if hasattr(item, "steps") and isinstance(item.steps, (list, tuple)):
+            for step in item.steps:
+                if isinstance(step, (list, tuple)) and len(step) >= 2:
+                    _patch(step[1])
+
+        # Traverse object __dict__
+        if hasattr(item, "__dict__"):
+            for val in list(item.__dict__.values()):
+                if isinstance(val, (list, tuple, set)):
+                    for sub in val:
+                        if hasattr(sub, "__dict__") or "SimpleImputer" in getattr(getattr(sub, "__class__", None), "__name__", ""):
+                            _patch(sub)
+                elif isinstance(val, dict):
+                    for sub in val.values():
+                        if hasattr(sub, "__dict__") or "SimpleImputer" in getattr(getattr(sub, "__class__", None), "__name__", ""):
+                            _patch(sub)
+                elif hasattr(val, "__dict__") or "SimpleImputer" in getattr(getattr(val, "__class__", None), "__name__", ""):
+                    _patch(val)
+
+    _patch(obj)
+    return obj
+
+
 def load_joblib(path: Path | str) -> object:
-    """Load a joblib object."""
-    return joblib.load(Path(path))
+    """Load a joblib object with scikit-learn cross-version compatibility."""
+    obj = joblib.load(Path(path))
+    return _patch_sklearn_compat(obj)
 
 
 def safe_datetime(series: pd.Series) -> pd.Series:

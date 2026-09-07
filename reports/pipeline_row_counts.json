@@ -1,0 +1,18 @@
+{
+  "mapped_parquet": {
+    "path": "D:\\MAJOR PROJECT\\Demo\\upi-fraud-detection\\data\\merged\\mapped_common_schema.parquet",
+    "rows": 7218220,
+    "rows_read": 7218220,
+    "rows_removed": 0,
+    "rows_written": 7218220,
+    "chunks": 74
+  },
+  "processed_parquet": {
+    "path": "D:\\MAJOR PROJECT\\Demo\\upi-fraud-detection\\data\\processed\\processed_features.parquet",
+    "rows": 7218220,
+    "rows_read": 7218220,
+    "rows_removed": 0,
+    "rows_written": 7218220,
+    "chunks": 73
+  }
+}

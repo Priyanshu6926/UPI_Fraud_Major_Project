@@ -20,9 +20,8 @@ ENV/
 .env.*
 
 # Local model and generated artifacts
-models/*.pkl
-reports/*.png
-reports/*.json
+models/random_forest.pkl
+models/lof_model.pkl
 data/merged/*.csv
 data/merged/mapped_common_schema.parquet
 data/processed/*.csv

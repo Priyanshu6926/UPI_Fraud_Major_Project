@@ -11,8 +11,10 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 
@@ -41,21 +43,20 @@ class TransactionRequest(BaseModel):
 
 
 app = FastAPI(
-    title="UPI Fraud Detection Local API",
-    description="Local API for offline model testing with the Vite React dashboard.",
+    title="UPI Fraud Detection API",
+    description="Full-stack API & Web Dashboard for UPI fraud and anomaly detection.",
     version="1.0.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+router = APIRouter()
 
 
 @lru_cache(maxsize=1)
@@ -64,13 +65,13 @@ def get_prediction_engine() -> PredictionEngine:
     return PredictionEngine(MODELS_DIR)
 
 
-@app.get("/health")
+@router.get("/health")
 def health() -> dict[str, str]:
     """Return API health status."""
     return {"status": "ok"}
 
 
-@app.get("/models/status")
+@router.get("/models/status")
 def model_status() -> dict[str, Any]:
     """Return model artifact availability for the UI."""
     engine = get_prediction_engine()
@@ -89,7 +90,7 @@ def model_status() -> dict[str, Any]:
     }
 
 
-@app.get("/presets")
+@router.get("/presets")
 def presets() -> list[dict[str, Any]]:
     """Return sample transaction presets for quick UI testing."""
     return [
@@ -129,7 +130,7 @@ def presets() -> list[dict[str, Any]]:
     ]
 
 
-@app.get("/reports/summary")
+@router.get("/reports/summary")
 def reports_summary() -> dict[str, Any]:
     """Expose saved training metrics when available."""
     metrics_path = REPORTS_DIR / "supervised_metrics.json"
@@ -144,13 +145,13 @@ def reports_summary() -> dict[str, Any]:
     }
 
 
-@app.get("/analytics/data")
+@router.get("/analytics/data")
 def data_analytics() -> dict[str, Any]:
     """Return cached analytics for the imported mapped dataset."""
     return get_dataset_analytics()
 
 
-@app.post("/predict")
+@router.post("/predict")
 def predict(payload: TransactionRequest) -> dict[str, Any]:
     """Run supervised and anomaly model predictions for one manual transaction."""
     engine = get_prediction_engine()
@@ -506,3 +507,18 @@ def _top_items(counts: dict[str, int], limit: int) -> list[dict[str, Any]]:
         {"label": label, "value": value}
         for label, value in sorted(counts.items(), key=lambda item: item[1], reverse=True)[:limit]
     ]
+
+
+app.include_router(router)
+app.include_router(router, prefix="/api")
+
+FRONTEND_DIST_DIR = PROJECT_ROOT / "frontend" / "dist"
+if FRONTEND_DIST_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST_DIR / "assets")), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        file_path = FRONTEND_DIST_DIR / full_path
+        if file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(FRONTEND_DIST_DIR / "index.html"))
