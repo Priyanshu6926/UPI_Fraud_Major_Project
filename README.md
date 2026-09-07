@@ -13,7 +13,9 @@
 
 > **B.Tech Final Year Major Project** — An end-to-end offline machine learning research system that combines supervised fraud detection and unsupervised anomaly detection with a transparent explainable fusion layer, applied to 7.2 million real UPI transaction records.
 > 
-> 🚀 **Cloud Deployment**: Ready for 1-click free hosting on Render & Hugging Face Spaces. See [DEPLOYMENT.md](DEPLOYMENT.md).
+> 🚀 **Live Demo on AWS**: [http://13.233.70.240](http://13.233.70.240) *(Instant, Always-On 24/7)*
+> 
+> 📄 **Deployment Guide**: See [DEPLOYMENT.md](DEPLOYMENT.md).
 
 </div>
 
